@@ -1,13 +1,22 @@
 #!/usr/bin/gawk -f
 
 BEGIN {
-  enc = "<html> <head> <meta charset='UTF-8'/> </head> <body>"
+  enc = "<html> <head> <meta charset='UTF-8'/> <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\" integrity=\"sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u\" crossorigin=\"anonymous\"> </head> <body>"
+  style = "<style>table, th, td {border: 1px solid black;border-collapse: collapse; margin-left: 15%;}th, td {padding: 3px;text-align: center;} body{margin-left: 20px; margin-right: 20px;}</style>"
+  table_begin = "<table style=\"width:70%\">\n"
+  table_end = "</table>\n"
+  caption = "<caption> %s </caption>\n"
+  tr_begin = "<tr>\n"
+  tr_end = "</tr>\n"
+  th = "<th> %s </th>\n"
+  td = "<td> %s </td>\n"
   list_begin = "<li> "
   list_end = " </li>\n"
   par_begin = "<p> "
   par_end = " </p>\n"
-  head1 = "<h1> %s </h1>\n"
-  head3 = "<h3> %s </h3>\n"
+  head1 = "<h1 style=\"text-align: center;\"> %s </h1>\n"
+  head3 = "<h3 style=\"text-align:center;\"> %s </h3>\n"
+  headx3 = "<h3> %s </h3>"
   head2 = "<h2> %s: %s </h2>\n"
   bold = "<b> %s </b>"
   div = "<hr></hr>"
@@ -71,9 +80,11 @@ match($0, "<CODIGO_POSTAL>(.*)</CODIGO_POSTAL>", cp){
 END {
   print enc > "index.html"
 
+  print style > "index.html"
+
   printf(head1, "Transações da Via Verde") > "index.html"
 
-  printf(par_begin bold "%s" par_end, "Emitido em: ", mes) > "index.html"
+  printf("<p style=\"text-align: center;\"> " bold "%s" par_end, "Emitido em: ", mes) > "index.html"
 
   print div > "index.html"
 
@@ -85,17 +96,28 @@ END {
 
   print div > "index.html"
 
-  printf(head3, "Número de entradas por dia") > "index.html"
-  for (dia in dias) printf (list_begin "%s: %d" list_end, dia, dias[dia]) > "index.html"
+  #printf(head3, "Número de entradas por dia") > "index.html"
+  #for (dia in dias) printf (list_begin "%s: %d" list_end, dia, dias[dia]) > "index.html"
+
+  #print div > "index.html"
+
+  printf(head3, "Informação geral de cada dia") > "index.html"
+  print table_begin > "index.html"
+  print tr_begin > "index.html"
+  printf(th th th, "Data", "Custo", "Nº Entradas") > "index.html"
+  print tr_end > "index.html"
+  for (data in impData){
+  	print tr_begin > "index.html"
+  	printf(td td td, data, impData[data] " €", dias[data]) > "index.html"
+  	print tr_end > "index.html"
+  }
+  print table_end > "index.html"
+
+  #for (data in impData) printf (list_begin "%s: %.2f €" list_end, data, impData[data]) > "index.html"
 
   print div > "index.html"
 
-  printf(head3, "Custo total por dia") > "index.html"
-  for (data in impData) printf (list_begin "%s: %.2f €" list_end, data, impData[data]) > "index.html"
-
-  print div > "index.html"
-
-  printf(head3, "Lista de locais de entrada") > "index.html"
+  printf(headx3, "Lista de locais de entrada") > "index.html"
   for (e in entradas) printf (list_begin "%s" list_end, e) > "index.html"
 
   print div > "index.html"
@@ -106,12 +128,12 @@ END {
   print div > "index.html"
 
   printf(head3, "Custo total do mês") > "index.html"
-  printf(par_begin "%s: %.2f €" par_end, "Total", custo) > "index.html"
+  printf(par_begin bold "%.2f €" par_end, "Total: ", custo) > "index.html"
 
   print div > "index.html"
 
   printf(head3, "Total gasto em parques") > "index.html"
-  printf(par_begin "%s: %.2f €" par_end, "Total", custoParque) > "index.html"
+  printf(par_begin bold "%.2f €" par_end, "Total: ", custoParque) > "index.html"
 
   print end > "index.html"
 }
