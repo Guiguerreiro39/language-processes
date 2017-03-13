@@ -8,6 +8,7 @@ BEGIN {
   par_end = " </p>\n"
   head1 = "<h1> %s </h1>\n"
   head3 = "<h3> %s </h3>\n"
+  head2 = "<h2> %s: %s </h2>\n"
   bold = "<b> %s </b>"
   div = "<hr></hr>"
   end = "</body> </html>"
@@ -41,6 +42,11 @@ match($0,"<IMPORTANCIA>(.*)</IMPORTANCIA>", importancia){
   custoParque += valorImportancia
 }
 
+/MES_EMISSAO/{
+	mes = $1
+}
+
+
 match($0, "<NOME>(.*)</NOME>", n){
 	nome = n[1]
 }
@@ -66,6 +72,8 @@ END {
   print enc > "index.html"
 
   printf(head1, "Transações da Via Verde") > "index.html"
+
+  printf(par_begin bold "%s" par_end, "Emitido em: ", mes) > "index.html"
 
   print div > "index.html"
 
