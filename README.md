@@ -1,5 +1,5 @@
 # PL
 Trabalho realizado por:
-- António Lopes
-- Diogo Soares
-- Guilherme Guerreiro
+- António Lopes A74357
+- Diogo Soares A74478
+- Guilherme Guerreiro A73860
