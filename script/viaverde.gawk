@@ -122,17 +122,17 @@ END {
 
   print div > "index.html"
 
-  printf(head3, "Lista de locais de saída") > "index.html"
+  printf(headx3, "Lista de locais de saída") > "index.html"
   for (local in listaL) printf (list_begin "%s" list_end, local) > "index.html"
 
   print div > "index.html"
 
-  printf(head3, "Custo total do mês") > "index.html"
+  printf(headx3, "Custo total do mês") > "index.html"
   printf(par_begin bold "%.2f €" par_end, "Total: ", custo) > "index.html"
 
   print div > "index.html"
 
-  printf(head3, "Total gasto em parques") > "index.html"
+  printf(headx3, "Total gasto em parques") > "index.html"
   printf(par_begin bold "%.2f €" par_end, "Total: ", custoParque) > "index.html"
 
   print end > "index.html"
