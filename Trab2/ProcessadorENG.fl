@@ -1,0 +1,172 @@
+%option noyywrap
+%{
+#include <glib.h>
+#include <string.h>
+
+GTree* sortVerbos;
+FILE* home;
+FILE* texto;
+FILE* lista;
+int indexAll = 0;
+
+void begin(FILE* home, FILE* texto, FILE* lista);
+void insert(char* yytext, int index);
+%}
+%%
+  // Cria os ficheiros .html
+  home = fopen("home.html", "w");
+  lista = fopen("lista.html", "w");
+
+  begin(home, texto, lista);
+
+  // Inicio da correção do texto
+
+\'m {
+	fprintf(texto, "%s", " am");
+}
+
+\'ll {
+	fprintf(texto, "%s", " will");
+}
+
+\'re {
+	fprintf(texto, "%s", " are");
+}
+
+can\'t {
+	fprintf(texto, "%s", " not");
+}
+
+n\'t {
+	fprintf(texto, "%s", " not");
+}
+
+\'s {
+	fprintf(texto, "%s", " is");
+}
+
+\'ve {
+	fprintf(texto, "%s", " have");
+}
+
+\'d {
+	fprintf(texto, "%s", " would");
+}
+
+\n {
+	fprintf(texto, "%s", "<br>");
+}
+
+  /* Irá procurar frases com as palavras em baixo em que asseguir contenha outra palavra */
+
+(to\ |can\ |could\ |shall\ |should\ |will\ |would\ |may\ |might\ )[a-z]* {
+	ECHO;
+	insert(yytext,1);
+}
+
+  /* Irá procurar frases com as palavras em baixo em que asseguir contenha duas palavras seguidas de qualquer coisa e em último tenha um '?' */
+
+(do\ |does\ |did\ )[a-z]*\ [a-z]*\ .*\? {
+	ECHO;
+	insert(yytext,2);
+}
+%%
+
+// Função que irá obter e inserir os verbos na nossa tree
+void insert(char* yytext, int index){
+	int i = 0;
+	char* verbo = (char*) malloc(sizeof(char) * 100);
+	char* aux = strtok(yytext, " ");
+
+	while(aux != NULL && i < index){
+		// Vai buscar a palavra na posição 1 ou 2 dependendo de que frase for
+		aux = strtok(NULL, " ");
+		i++;
+	}
+
+	if(aux && strlen(aux) > 1)
+		verbo = strdup(aux);
+
+	gpointer gp = NULL;
+	gp = g_tree_lookup(sortVerbos, verbo);
+
+	if(!gp){
+		g_tree_insert(sortVerbos, verbo, " ");
+	}
+
+}
+
+// Função que imprime o inicio do .html
+void begin(FILE* home, FILE* texto, FILE* lista){
+	char* enc = "<html> <head> <meta charset='UTF-8'/> <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\" integrity=\"sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u\" crossorigin=\"anonymous\"> </head> <body>\n";
+	char* style = "<style>table, th, td {border: 1px solid black;border-collapse: collapse; margin-left: 15%;}th, td {padding: 3px;text-align: center;} body{margin-left: 20px; margin-right: 20px;}</style>\n";
+	char* head1 = "<h1 style=\"text-align: center;\"> %s </h1>\n";
+	char* ref = "<li><a href=\"%s\"> %s </a></li>\n";
+	char* hr = "<hr>\n";
+
+	fprintf(home, "%s%s", enc, style);
+	fprintf(texto, "%s%s", enc, style);
+	fprintf(lista, "%s%s", enc, style);
+
+	fprintf(texto, ref, "home.html", "Voltar");
+	fprintf(lista, ref, "home.html", "Voltar");
+
+	fprintf(home, head1, "Processador de Inglês");
+	fprintf(texto, head1, "Texto com Inglês corrente");
+	fprintf(lista, head1, "Lista de verbos ordenados pelo número de entradas");
+
+	fprintf(home, "<p style=\"text-align: center;\"><b> Trabalho realizado por: </b></p>");
+	fprintf(home, "<li style=\"text-align: center;\">%s</li>\n", "António Lopes");
+	fprintf(home, "<li style=\"text-align: center;\">%s</li>\n", "Diogo Soares");
+	fprintf(home, "<li style=\"text-align: center;\">%s</li>\n", "Guilherme Guerreiro");
+
+	fprintf(home, "%s", hr);
+	fprintf(texto, "%s", hr);
+	fprintf(lista, "%s", hr);
+
+	fprintf(home, ref, "texto.html", "Texto em Inglês correto");
+	fprintf(home, ref, "lista.html", "Lista de verbos");
+
+}
+
+// Função que imprime o fim do .html
+void end(FILE* home, FILE* texto, FILE* lista){
+	char* end = "</body> </html>";
+	fprintf(home, end);
+	fprintf(texto, end);
+	fprintf(lista, end);
+}
+
+// Imprime os verbos no .html
+gboolean insertTable(gpointer key, gpointer value, gpointer user_data){
+	char* entrada = "<tr>\n<td>%s</td>\n</tr>\n";
+	fprintf(lista, entrada, key);
+
+	return FALSE;
+}
+
+int main(int argc, char* argv[]){
+	sortVerbos = g_tree_new((GCompareFunc)g_ascii_strcasecmp);
+
+	yyout = fopen("texto.html", "w");
+	texto = yyout;
+
+	if(argc == 2)
+		yyin = fopen(argv[1], "r");
+
+	yylex();
+
+	char* table_begin = "<table style=\"width:70%\">\n";
+	char* table_end = "</table>\n";
+	char* tr_begin = "<tr>\n";
+	char* tr_end = "</tr>\n";
+	char* th_begin = "<th>";
+	char* th_end = "</th>\n";
+
+    fprintf(lista, "%s%s%s%s%s%s", table_begin, tr_begin, th_begin, "Verbos", th_end, tr_end);
+    g_tree_foreach(sortVerbos, insertTable, NULL);
+    fprintf(lista, "%s", table_end);
+
+    end(home, texto, lista);
+    return 0;
+}

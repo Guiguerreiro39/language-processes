@@ -1,0 +1,154 @@
+%option noyywrap
+%{
+#include <glib.h>
+#include <string.h>
+GHashTable* verbos;
+GTree* verbosOrdenada;
+FILE* start;
+FILE* text;
+FILE* table;
+gboolean finder(gpointer key, gpointer value, gpointer user_data);
+void init(FILE* start, FILE* text, FILE* table);
+void insertVerb(char* yytext, int index );
+%}
+%%
+  start = fopen("processadorIngles.html", "w");
+  table = fopen("table.html", "w");
+  /*INICIO*/
+  init(start,text,table);
+  
+  char verbo[32];
+  gint* indice= g_new(gint,1);
+  (*indice)=1;
+\'m { 
+	fprintf(text,"%s"," am"); 
+}
+\'s { 
+	fprintf(text,"%s"," is"); 
+}
+\'re { 
+	fprintf(text,"%s"," are"); 
+}
+\'ll { 
+	fprintf(text,"%s"," will"); 
+}
+\'ve { 
+	fprintf(text,"%s"," have"); 
+}
+n\'t {
+	fprintf(text,"%s"," not");
+}
+\n {
+	fprintf(text,"%s","<br>");
+}
+(to\ |can\ |could\ |shall\ |should\ |will\ |would\ |may\ |might\ )[a-zA-Z]* {
+	insertVerb(yytext,1);
+}
+(do\ |does\ |did\ )[a-zA-Z]*\ [a-zA-Z]*.*\? {
+	insertVerb(yytext,2);
+}
+%%
+
+void insertVerb(char* yytext, int index ){
+	char* value = (char*)malloc(sizeof(char) * 32);
+	int i=0;
+	char* token = strtok(yytext," ");
+	while(token!=NULL){
+		printf("%s\n", token);
+		token = strtok(NULL," ");
+		if(token!=NULL && i<index)strcpy(value,token);
+		else break;
+		i++;
+	}
+	value[strlen(value)]=0;
+
+	int *aux = (int *) g_hash_table_lookup(verbos,value);
+ 	if(aux == NULL && strlen(value)>1){
+ 		gint* ind= g_new(gint,1);	
+		(*ind)=1;
+		g_hash_table_insert(verbos,value,ind); 
+ 	}
+	else if(strlen(value)>1){
+		gint* ind= g_new(gint,1);
+		gpointer gp = g_hash_table_find(verbos, (GHRFunc)finder,value);	
+		gint num = *(gint*)gp;
+		(*ind)= num+1;
+		g_hash_table_replace(verbos,value,ind);
+	}
+}
+
+void init(FILE* start, FILE* text, FILE* table){
+	char* enc = "<html> <head> <meta charset='UTF-8'/> <style>table, th, td {border: 1px solid black; border-collapse: collapse;} th, td {padding: 5px;} th {text-align: left;}</style> </head> <body>";
+  	char* head = "<h1 align=\"center\"> Processador Inglês </h1>\n<hr>";
+  	char* referencia = "<li><a href=\"%s\"> %s </a></li>\n\n";
+
+  	fprintf(start,"%s",enc);
+  	fprintf(text,"%s",enc);
+  	fprintf(table,"%s",enc);
+
+  	fprintf(start,"%s",head);
+  	fprintf(text,"%s<p>",head);
+  	fprintf(table,"%s",head);
+
+  	fprintf(start,referencia,"text.html","Texto expandido");
+  	fprintf(start,referencia,"table.html","Tabela dos Verbos");
+}
+
+void end(FILE* start, FILE* text, FILE* table){
+  	fprintf(start,"%s","</body> </html>");
+  	fprintf(text,"</p>%s","</body> </html>");
+  	fprintf(table,"%s","</body> </html>");
+}
+
+gint compare(gconstpointer aPtr, gconstpointer bPtr){
+	gint a,b;
+
+	a = *(gint *)aPtr;  
+  	b = *(gint *)bPtr; 
+
+	if(a<b) return 1;
+	return -1;
+}
+
+gboolean iterator(gpointer key, gpointer value, gpointer user_data) {
+	char* table_entry = "<tr> <td> %s </td><td> %d </td> </tr>";
+	fprintf(table, table_entry, value, *(gint*)key);
+
+	return FALSE;
+}
+
+gboolean finder(gpointer key, gpointer value, gpointer user_data){
+	return strcmp(key,user_data)==0;
+}
+
+void inserir(gpointer key, gpointer value, gpointer user_data){
+	gint* aux = (gint*)value;
+	char* aux2 = (char*)key;
+
+	g_tree_insert(verbosOrdenada, aux, aux2);
+}
+
+int main (int argc, char* argv[]) {
+	verbos = g_hash_table_new(g_str_hash, g_int_equal);
+	verbosOrdenada = g_tree_new(compare);
+
+    if(argc == 2)
+      yyin = fopen(argv[1], "r");
+
+    yyout = fopen("text.html", "w");
+    text = yyout;
+    yylex();
+
+    g_hash_table_foreach(verbos, (GHFunc)inserir, NULL);
+
+    /*Lista ordenada pelo número de entradas*/
+    char* table_start = "<table style=\"width:30%\"><tr> <th>Verbo</th><th>Número de Entradas</th> </tr>";
+    fprintf(table,"%s",table_start);
+    g_tree_foreach(verbosOrdenada, (GTraverseFunc)iterator, NULL);
+ 	char* table_end = "</table>";
+ 	fprintf(table,"%s",table_end);
+
+    /*FIM*/
+    end(start,text,table);
+    return 0;
+}
