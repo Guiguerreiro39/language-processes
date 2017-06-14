@@ -1,0 +1,40 @@
+	pushn 5
+	pushi 0
+jump inic
+start
+inic: 	pushi 0
+	storeg 5
+label0: 	pushg 5
+	pushi 5
+	inf
+	jz label1
+	pushgp
+	pushi 0
+	padd
+	pushg 5
+	read
+	atoi
+	storen
+	pushg 5
+	pushi 1
+	add
+	storeg 5
+jump label0
+label1: label2: 	pushg 5
+	pushi 1
+	pushi 0
+	supeq
+	sub
+	jz label3
+	pushgp
+	pushi 0
+	padd
+	pushg 5
+	loadn
+	writei
+	pushg 5
+	pushi 1
+	sub
+	storeg 5
+jump label2
+label3: stop

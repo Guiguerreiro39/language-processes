@@ -1,0 +1,37 @@
+	pushi 0
+	pushi 0
+	pushi 0
+	pushi 0
+jump inic
+start
+inic: 	pushi 0
+	storeg 3
+	read
+	atoi
+	storeg 0
+	read
+	atoi
+	storeg 1
+	pushg 1
+	storeg 2
+label1: 	pushg 3
+	pushg 2
+	inf
+	jz label2
+	read
+	atoi
+	storeg 1
+	pushg 1
+	pushg 2
+	inf
+	jz label0
+	pushg 1
+	storeg 2
+label0: 	pushg 3
+	pushi 1
+	add
+	storeg 3
+jump label1
+label2: 	pushg 2
+	writei
+stop
