@@ -1,0 +1,22 @@
+Inteiro i, b[5], j, a;
+INICIAR
+    i = 0;
+    @(i < 5){
+        j = 0;
+        ler(b[i]);
+        @(j < i){
+            ?(b[j] < b[j+1]){
+                a = b[j];
+                b[j] = b[j+1];
+                b[j+1] = a;
+            }
+            j = j + 1;
+        }
+        i = i + 1;
+    }
+    i = 0;
+    @(i < 5){
+        escrever(b[i]);
+    }
+
+PARAR

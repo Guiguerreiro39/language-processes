@@ -1,0 +1,13 @@
+Inteiro N, a, conta, i;
+INICIAR
+    ler(N);
+    ler(a);
+    @(i < N){
+        ?(a % 2 != 0){
+            escrever(a);
+            conta = conta + 1;
+        }
+        i = i + 1;
+    }
+    escrever(conta);
+PARAR

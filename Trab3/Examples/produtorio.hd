@@ -1,0 +1,11 @@
+Inteiro N, a, i, prod;
+INICIAR
+    ler(N);
+    prod = 1;
+    @(i < N){
+        ler(a);
+        prod = prod * a;
+        i = i + 1;
+    }
+    escrever(prod);
+PARAR

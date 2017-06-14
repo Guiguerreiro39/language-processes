@@ -1,0 +1,12 @@
+Inteiro b[5], i;
+INICIAR
+    i = 0;
+    @(i < 5){
+        ler(b[i]);
+        i = i + 1;
+    }
+    @(i-1 >= 0){
+        escrever(b[i]);
+        i = i - 1;
+    }
+PARAR

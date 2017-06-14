@@ -1,0 +1,10 @@
+Inteiro a, b, c, d;
+INICIAR
+    ler(a);
+    ler(b);
+    ler(c);
+    ler(d);
+    ?(a == b & a == c & a == d){ 
+        escrever("Verdadeiro");
+    }_{ escrever("Falso"); }
+PARAR

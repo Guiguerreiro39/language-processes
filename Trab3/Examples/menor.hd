@@ -1,0 +1,15 @@
+Inteiro n, a, menor, i;
+INICIAR
+    i = 0;
+    ler(n);
+    ler(a);
+    menor = a;
+    @(i < menor) {
+        ler(a);
+        ?(a < menor){
+            menor = a;
+        }
+        i = i + 1;
+    }
+    escrever(menor);
+PARAR
